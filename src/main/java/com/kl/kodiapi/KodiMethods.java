@@ -3,14 +3,16 @@ package com.kl.kodiapi;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.logging.Logger;
 
+import com.github.psamsotha.jersey.properties.Prop;
 import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.internal.util.*;
 import org.glassfish.jersey.server.mvc.Template;
 import org.json.*;
 
@@ -44,6 +46,7 @@ public class KodiMethods {
         if (action == null) action="default";
         switch (action) {
             case "play":
+                switchToKodi();
                 getJsonUrlResponse(KODI_BASE_URL + String.format(PLAY_EPISODE_ID,nextEpisodeDetails.get("episodeid")));
                 LOGGER.info("Playing Next Episode. Server Response: " + jsonUrlResponse2.toString());
                 return new Context(String.format("Playing %s Season %s Episode %s / Episode ID: %s",
@@ -95,6 +98,17 @@ public class KodiMethods {
 
     private String encodeKodiUrl(String url) {
         return url.replaceAll("\"", "%22").replaceAll(" ", "%20");
+    }
+
+    private void switchToKodi() throws IOException, InterruptedException{
+        try {
+            ProcessBuilder pb = new ProcessBuilder("adb", "shell", "\"am start com.semperpax.spmc16/.Splash\"");
+            Process pc = pb.start();
+            pc.waitFor();
+            LOGGER.info("Switched Shield TV to SPMC");
+        } catch (Exception e) {
+            LOGGER.warning(String.format("Unable to switch Shield to SPMC: %s", e.toString()));
+        }
     }
 
     public static class Context {

@@ -1,4 +1,4 @@
-package com.kl.wakeonlan;
+package com.kl.kodiapi.utils.wakeonlan;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

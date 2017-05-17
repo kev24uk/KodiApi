@@ -1,4 +1,4 @@
-package com.kl.kodiapi.devicecontroller.denon;
+package com.kl.kodiapi.utils.denon;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,42 +6,45 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class Connection {
-    private static Connection instance = null;
+public class TelNetConnection {
+    private static TelNetConnection instance = null;
 
     private Socket s = null;
     private PrintWriter out = null;
     private BufferedReader in = null;
+    private String ipAddress;
 
-    private Connection() {
-
-        try
-        {
-            s = new Socket("192.168.0.14", 23);
-            out = new PrintWriter(s.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-
-        } catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+    private TelNetConnection(String ipAddress) {
+        this.ipAddress = ipAddress;
+        setupConnection();
     }
 
-    public void sendCommand(String cmd){
-        out.print(cmd + '\r');
-        out.flush();
+    private void setupConnection() {
         try {
-            System.out.println(in.readLine());
+            s = new Socket(ipAddress, 23);
+            out = new PrintWriter(s.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(s.getInputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static Connection getInstance(){
+    public void sendCommand(String cmd){
+        if (s.isClosed()) setupConnection();
+        out.print(cmd + '\r');
+        out.flush();
+
+        try {
+            s.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    public static TelNetConnection getInstance(String ipAddress){
         if(instance == null) {
-            instance = new Connection();
+            instance = new TelNetConnection(ipAddress);
         }
         return instance;
     }

@@ -1,5 +1,7 @@
 package com.kl.kodiapi;
 
+import com.github.psamsotha.jersey.properties.JerseyPropertiesFeature;
+import com.kl.kodiapi.devicecontroller.TVController;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -9,26 +11,26 @@ import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
- * Main class.
+ * App class.
  *
  */
-public class Main {
+public class App {
     // Base URI the Grizzly HTTP server will listen on
     public static final String BASE_URI = "http://0.0.0.0:9555/";
 
-    /**
-     * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
-     * @return Grizzly HTTP server.
-     */
-    public static HttpServer startServer() {
-        // create a resource config that scans for JAX-RS resources and providers
-        // in com.example.rest package
+    public static HttpServer startServer() throws IOException {
         final ResourceConfig rc = new ResourceConfig().packages("com.kl.kodiapi");
+
         rc.register(LoggingFilter.class);
         rc.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "/templates/");
         rc.register(MustacheMvcFeature.class);
+        rc.register(JerseyPropertiesFeature.class);
+        rc.property(JerseyPropertiesFeature.RESOURCE_PATH, "config.properties");
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI
@@ -36,7 +38,7 @@ public class Main {
     }
 
     /**
-     * Main method.
+     * App method.
      * @param args
      * @throws IOException
      */
